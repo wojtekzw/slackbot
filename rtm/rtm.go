@@ -3,6 +3,7 @@ package rtm
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"log"
 
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	Config *BlockConfig
+	Config = &BlockConfig{}
 )
 
 type NameID struct {
@@ -28,28 +29,33 @@ type BlockConfig struct {
 	groups       utils.GlobalChannels
 }
 
+// FIXME: Trim && ToLower all env strings
+// walidacja danych zewnętrznych - co robic w razie błedów
 func (b *BlockConfig) ReadBlockChannelConfig(api *slack.Client) {
-
-	b.Admins = make([]NameID, 10)
-	b.AllowedUsers = make([]NameID, 10)
 
 	b.Channel.Name = os.Getenv("SLACKBOT_BLOCK_CHANNEL_NAME")
 
 	b.Owner.Name = os.Getenv("SLACKBOT_OWNER_NAME")
 
-	defAdminName := os.Getenv("SLACKBOT_ALLOWED_ADMIN_NAME")
-	if defAdminName != "" {
-		b.Admins = append(b.Admins, NameID{Name: defAdminName})
+	defAdminName := os.Getenv("SLACKBOT_ADMIN_NAME")
+	for _, elem := range strings.Fields(defAdminName) {
+		b.Admins = append(b.Admins, NameID{Name: elem})
 	}
 
 	defUserName := os.Getenv("SLACKBOT_ALLOWED_USER_NAME")
-	if defUserName != "" {
-		b.AllowedUsers = append(b.AllowedUsers, NameID{Name: defUserName})
+	for _, elem := range strings.Fields(defUserName) {
+		b.AllowedUsers = append(b.AllowedUsers, NameID{Name: elem})
 	}
 
 	b.DeletedMsg = os.Getenv("SLACKBOT_DELETED_MSG")
 
+	log.Printf("Admins: %v len %v cap %v\n", b.Admins, len(b.Admins), cap(b.Admins))
+	log.Printf("Allowed: %v  len %v cap %v\n", b.AllowedUsers, len(b.AllowedUsers), cap(b.AllowedUsers))
+
 	b.convertIDsToNames(api)
+
+	log.Printf("Admins 2: %v len %v cap %v\n", b.Admins, len(b.Admins), cap(b.Admins))
+	log.Printf("Allowed 2: %v  len %v cap %v\n", b.AllowedUsers, len(b.AllowedUsers), cap(b.AllowedUsers))
 
 }
 
@@ -64,6 +70,8 @@ func (b *BlockConfig) convertIDsToNames(api *slack.Client) {
 	// convert names to ID's
 	b.Channel.ID = b.groups.NameToID(b.Channel.Name[1:])
 
+	b.Owner.ID = b.users.NameToID(b.Owner.Name[1:])
+
 	for i := range b.Admins {
 		b.Admins[i].ID = b.users.NameToID(b.Admins[i].Name[1:])
 	}
@@ -74,7 +82,7 @@ func (b *BlockConfig) convertIDsToNames(api *slack.Client) {
 }
 
 func (b *BlockConfig) IsOwner(id string) bool {
-	return b.Channel.ID == id
+	return b.Owner.ID == id
 }
 
 func (b *BlockConfig) IsAdmin(id string) bool {
@@ -96,13 +104,18 @@ func (b *BlockConfig) IsAllowedUser(id string) bool {
 }
 
 func (b *BlockConfig) IsBlockedChannel(id string) bool {
+	log.Printf("Config blocked: %s (%s), mgs channel: %s (%s)\n", b.Channel.ID, b.groups.IDToName(b.Channel.ID), id, b.groups.IDToName(id))
 	return b.Channel.ID == id
 }
 
 func (b *BlockConfig) IsAllowedWrite(id string) bool {
+	log.Printf("isOwner: %t, isAdmin: %t, isAllowedUser: %t\n", b.IsOwner(id), b.IsAdmin(id), b.IsAllowedUser(id))
 	return b.IsOwner(id) || b.IsAdmin(id) || b.IsAllowedUser(id)
 }
 
+func (b *BlockConfig) IsNotAllowedWrite(id string) bool {
+	return !b.IsAllowedWrite(id)
+}
 func (b *BlockConfig) AdminNames() []string {
 	var admins []string
 	for i := range b.Admins {
@@ -168,8 +181,10 @@ Loop:
 					// to be deleted
 					// If Hidden - do nothing - because users don't see it
 
-					// TODO - FIX config checking
-					if (ev.Channel == Config.Channel.ID) && (ev.User != Config.AllowedUsers[0].ID) {
+					if Config.IsBlockedChannel(ev.Channel) && Config.IsNotAllowedWrite(ev.User) {
+						if slackbotRTMDebug || true {
+							log.Printf("Message to delete: %s\n", utils.StructPrettyPrint(msg))
+						}
 						schan, ts, err := api.DeleteMessage(ev.Channel, ev.Timestamp)
 						if err != nil {
 							log.Printf("Error deleting message. Chan: %s, ts: %s, err: %v\n", schan, ts, err)

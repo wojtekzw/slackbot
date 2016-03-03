@@ -4,7 +4,7 @@ Simple, pluggable bot framework for [Slack](https://www.slack.com) chat.
 
 Installation
 ============
-You can grab the source code using `go get github.com/trinchan/slackbot` and install like usual. `go install github.com/trinchan/slackbot`
+You can grab the source code using `go get github.com/wojtekzw/slackbot` and install like usual. `go install github.com/wojtekzw/slackbot`
 
 Setup
 =====
@@ -42,7 +42,7 @@ The bot will respond to commands of the form `{trigger_word}bot param param para
 #####Configuring Slash Commands
 Alternatively, each bot you make can respond to a corresponding [Slash Command](https://my.slack.com/services/new/slash-commands).
 
-1. Add a new slash command, use the [bot's name](https://github.com/trinchan/slackbot/tree/master/robots) as the name of the command.
+1. Add a new slash command, use the [bot's name](https://github.com/wojtekzw/slackbot/tree/master/robots) as the name of the command.
 2. The URL should follow the following format: `your_address.com:port/slack` (no trailing /)
 3. You want to use POST.
 4. For each bot, set an environment variable `BOTNAME_SLACK_TOKEN` to your slash command's token. This is used to verify payloads come from Slack.
@@ -55,8 +55,8 @@ After setting up the proper environment variables, deploying to heroku should be
 
 Adding Bots
 ===========
-1. Create a new package and implement the [Robot](https://github.com/trinchan/slackbot/tree/master/robots/robot.go) interface.
-2. In [importer/importer.sh](https://github.com/trinchan/slackbot/tree/master/importer/importer.sh), add the path to your package to the robots array.
+1. Create a new package and implement the [Robot](https://github.com/wojtekzw/slackbot/tree/master/robots/robot.go) interface.
+2. In [importer/importer.sh](https://github.com/wojtekzw/slackbot/tree/master/importer/importer.sh), add the path to your package to the robots array.
 3. Run `go generate ./...` to generate `init.go` which will import your bot.
 4. Rebuild slackbot and deploy.
 
@@ -65,7 +65,7 @@ If you use [Sublime Text](http://www.sublimetext.com/) or another editor which s
 ```go
 package test
 
-import "github.com/trinchan/slackbot/robots"
+import "github.com/wojtekzw/slackbot/robots"
 
 type bot struct{}
 

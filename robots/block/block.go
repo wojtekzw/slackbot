@@ -2,7 +2,6 @@ package robots
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/wojtekzw/slackbot/robots"
@@ -22,7 +21,7 @@ func init() {
 
 func (r bot) Run(p *robots.Payload) (slashCommandImmediateReturn string) {
 	// go r.DeferredAction(p)
-	log.Printf("Block robot run: %s\n", slashCommandImmediateReturn)
+	// log.Printf("Block robot run: %s\n", slashCommandImmediateReturn)
 	return r.blockCommand(p)
 }
 
@@ -46,9 +45,9 @@ func (r bot) Description() (description string) {
 
 func (r bot) listCommand() string {
 	adminsStr := strings.Join(r.config.AdminNames(), ",")
-	allowedUsersStr := strings.Join(r.config.AllowedUsersNames(), ",")
+	allowedUsersStr := strings.Join(r.config.AllowedUsersNames(), ", ")
 
-	return fmt.Sprintf("Blocked channel: %s\nAdmins: %s\nAllowed users: %s\n", r.config.Channel, adminsStr, allowedUsersStr)
+	return fmt.Sprintf("Blocked channel: %s\nAdmins: %s\nAllowed users: %s\n", r.config.Channel.Name, adminsStr, allowedUsersStr)
 }
 
 func (r bot) blockCommand(p *robots.Payload) (result string) {

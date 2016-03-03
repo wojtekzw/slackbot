@@ -3,7 +3,7 @@
 <![CDATA[
 package ${1:${TM_FILENAME/(.*?)(\..+)/$1/}}
 
-import "github.com/trinchan/slackbot/robots"
+import "github.com/wojtekzw/slackbot/robots"
 
 type bot struct{}
 

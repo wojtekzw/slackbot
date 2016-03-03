@@ -118,8 +118,7 @@ func (g *GlobalChannels) GetChannels(api *slack.Client) {
 
 	for i := 0; i < len(g.Channels); i++ {
 		channel := g.Channels[i]
-		// log.Printf("Channel debug: %s", StructPrettyPrint(channel))
-		log.Printf("Channel Name: %s, ID: %s, IsChannel: %t\n", channel.Name, channel.ID, channel.IsChannel)
+		// log.Printf("Channel Name: %s, ID: %s, IsChannel: %t\n", channel.Name, channel.ID, channel.IsChannel)
 		g.nameIndex[channel.Name] = idxGrpChan{t: "c", i: i}
 		g.idIndex[channel.ID] = idxGrpChan{t: "c", i: i}
 	}
@@ -132,7 +131,7 @@ func (g *GlobalChannels) GetChannels(api *slack.Client) {
 
 	for i := 0; i < len(g.Groups); i++ {
 		group := g.Groups[i]
-		log.Printf("Group Name: %s, ID: %s, IsChannel: %t\n", group.Name, group.ID, false)
+		// log.Printf("Group Name: %s, ID: %s, IsChannel: %t\n", group.Name, group.ID, false)
 		g.nameIndex[group.Name] = idxGrpChan{t: "g", i: i}
 		g.idIndex[group.ID] = idxGrpChan{t: "g", i: i}
 	}
@@ -145,7 +144,7 @@ func (g *GlobalChannels) GetChannels(api *slack.Client) {
 
 	for i := 0; i < len(g.IMs); i++ {
 		im := g.IMs[i]
-		log.Printf("IM Name: %s, ID: %s, IsChannel: %t\n", im.User, im.ID, false)
+		// log.Printf("IM Name: %s, ID: %s, IsChannel: %t\n", im.User, im.ID, false)
 		g.nameIndex[im.User] = idxGrpChan{t: "d", i: i}
 		g.idIndex[im.ID] = idxGrpChan{t: "d", i: i}
 	}

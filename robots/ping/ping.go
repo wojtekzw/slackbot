@@ -3,7 +3,7 @@ package robots
 import (
 	"fmt"
 
-	"github.com/trinchan/slackbot/robots"
+	"github.com/wojtekzw/slackbot/robots"
 )
 
 type bot struct{}
@@ -32,5 +32,5 @@ func (pb bot) DeferredAction(p *robots.Payload) {
 }
 
 func (pb bot) Description() (description string) {
-	return "Ping bot!\n\tUsage: /ping\n\tExpected Response: @user: Pong!"
+	return "Ping bot\n\tUsage: /ping"
 }

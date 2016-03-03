@@ -1,15 +1,21 @@
 #!/bin/bash
 touch $1
 > $1
+# robots=(
+#     "github.com/wojtekzw/slackbot/robots/decide"
+#     "github.com/wojtekzw/slackbot/robots/bijin"
+#     "github.com/wojtekzw/slackbot/robots/nihongo"
+#     "github.com/wojtekzw/slackbot/robots/ping"
+#     "github.com/wojtekzw/slackbot/robots/roll"
+#     "github.com/wojtekzw/slackbot/robots/store"
+#     "github.com/wojtekzw/slackbot/robots/wiki"
+#     "github.com/wojtekzw/slackbot/robots/bot"
+# )
+
 robots=(
-    "github.com/trinchan/slackbot/robots/decide"
-    "github.com/trinchan/slackbot/robots/bijin"
-    "github.com/trinchan/slackbot/robots/nihongo"
-    "github.com/trinchan/slackbot/robots/ping"
-    "github.com/trinchan/slackbot/robots/roll"
-    "github.com/trinchan/slackbot/robots/store"
-    "github.com/trinchan/slackbot/robots/wiki"
-    "github.com/trinchan/slackbot/robots/bot"
+    "github.com/wojtekzw/slackbot/robots/ping"
+    "github.com/wojtekzw/slackbot/robots/block"
+    "github.com/wojtekzw/slackbot/robots/bots"
 )
 
 echo "package importer
