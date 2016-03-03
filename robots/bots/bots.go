@@ -1,0 +1,24 @@
+package directory
+
+import "github.com/wojtekzw/slackbot/robots"
+
+type bot struct{}
+
+func init() {
+	r := &bot{}
+	robots.RegisterRobot("bots", r)
+}
+
+func (r *bot) Run(p *robots.Payload) (slashCommandImmediateReturn string) {
+	output := ""
+	for command, robs := range robots.Robots {
+		for _, r := range robs {
+			output = output + "\n" + command + " - " + r.Description() + "\n"
+		}
+	}
+	return output
+}
+
+func (r *bot) Description() (description string) {
+	return "Lists commands\n\tUsage: /bots"
+}

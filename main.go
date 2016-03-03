@@ -8,15 +8,56 @@ import (
 	"os"
 	"strings"
 
-	"github.com/trinchan/slackbot/Godeps/_workspace/src/github.com/gorilla/schema"
-	_ "github.com/trinchan/slackbot/importer"
-	"github.com/trinchan/slackbot/robots"
+	"github.com/gorilla/handlers"
+	"github.com/justinas/alice"
+	"github.com/wojtekzw/slackbot/Godeps/_workspace/src/github.com/gorilla/schema"
+	_ "github.com/wojtekzw/slackbot/importer"
+	"github.com/wojtekzw/slackbot/robots"
+	"github.com/wojtekzw/slackbot/rtm"
 )
 
 func main() {
-	http.HandleFunc("/slack", slashCommandHandler)
-	http.HandleFunc("/slack_hook", hookHandler)
-	startServer()
+
+	// simpleHandler := http.HandlerFunc(simpleLogHandler)
+
+	stdChain := alice.New(serverLoggingHandler)
+
+	http.Handle("/", stdChain.ThenFunc(http.NotFound))
+	http.Handle("/slack", stdChain.ThenFunc(slashCommandHandler))
+	http.Handle("/slack_hook", stdChain.ThenFunc(hookHandler))
+
+	go rtm.RunRTM()
+
+	// go startServer()
+
+	startTLSServer()
+
+}
+
+func serverLoggingHandler(h http.Handler) http.Handler {
+	logFile, err := os.OpenFile("server.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	return handlers.LoggingHandler(logFile, h)
+}
+
+// func simpleHandler() http.Handler {
+// 	fn := func(w http.ResponseWriter, r *http.Request) {
+// 		tm := time.Now().Format(time.RFC1123)
+// 		log.Printf("%s %s %s %s %s", tm, r.Method, r.UserAgent(), r.URL, r.Proto)
+// 	}
+// 	return http.HandlerFunc(fn)
+// }
+
+// func simpleLogHandler(w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("%s %s %s %s", r.Method, r.UserAgent(), r.URL, r.Proto)
+// }
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	plainResp(w, "No info for you - sorry :(")
+	return
 }
 
 func hookHandler(w http.ResponseWriter, r *http.Request) {
@@ -114,13 +155,33 @@ func getOutToken(teamDomain string) string {
 	return os.Getenv(fmt.Sprintf("%s_OUT_TOKEN", strings.ToUpper(teamDomain)))
 }
 
+func getTLSCert() string {
+	return os.Getenv("SLACKBOT_TLS_CERT")
+}
+
+func getTLSKey() string {
+	return os.Getenv("SLACKBOT_TLS_KEY")
+}
+
 func startServer() {
-	port := os.Getenv("PORT")
+	port := os.Getenv("HTTP_PORT")
 	if port == "" {
-		log.Fatal("PORT not set")
+		log.Fatal("HTTP_PORT not set")
 	}
 	log.Printf("Starting HTTP server on %s", port)
 	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Fatal("Server start error: ", err)
+	}
+}
+
+func startTLSServer() {
+	port := os.Getenv("HTTPS_PORT")
+	if port == "" {
+		log.Fatal("HTTPS_PORT not set")
+	}
+	log.Printf("Starting HTTPS server on %s", port)
+	err := http.ListenAndServeTLS(":"+port, getTLSCert(), getTLSKey(), nil)
 	if err != nil {
 		log.Fatal("Server start error: ", err)
 	}
